@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"] // disable default console for a Windows GUI app
+
 use std::{
     env,
     ffi::CString,
@@ -8,33 +10,34 @@ use std::{
 };
 
 use winapi::{
-    shared::minwindef::{BOOL, DWORD, FALSE, TRUE},
+    // shared::minwindef::{BOOL, DWORD, FALSE, TRUE},
+    shared::minwindef::{DWORD, FALSE},
     um::{
         combaseapi::CoInitializeEx,
-        consoleapi,
+        // consoleapi,
         objbase::{COINIT_APARTMENTTHREADED, COINIT_DISABLE_OLE1DDE},
         processthreadsapi::GetExitCodeProcess,
         shellapi::{ShellExecuteExA, SEE_MASK_NOASYNC, SEE_MASK_NOCLOSEPROCESS, SHELLEXECUTEINFOA},
         synchapi::WaitForSingleObject,
         winbase::INFINITE,
-        wincon,
+        // wincon,
         winuser::SW_NORMAL,
     },
 };
 
-unsafe extern "system" fn routine_handler(evt: DWORD) -> BOOL {
-    match evt {
-        wincon::CTRL_C_EVENT => TRUE,        //eprintln!("ctrl_c handled!"),
-        wincon::CTRL_BREAK_EVENT => TRUE,    //eprintln!("ctrl_break handled!"),
-        wincon::CTRL_CLOSE_EVENT => TRUE,    //eprintln!("ctrl_close handled!"),
-        wincon::CTRL_LOGOFF_EVENT => TRUE,   //eprintln!("ctrl_logoff handled!"),
-        wincon::CTRL_SHUTDOWN_EVENT => TRUE, //eprintln!("ctrl_shutdown handled!"),
-        other => {
-            eprintln!("unknown event number: {}, unhandled!", other);
-            return FALSE;
-        }
-    }
-}
+// unsafe extern "system" fn routine_handler(evt: DWORD) -> BOOL {
+//     match evt {
+//         wincon::CTRL_C_EVENT => TRUE,        //eprintln!("ctrl_c handled!"),
+//         wincon::CTRL_BREAK_EVENT => TRUE,    //eprintln!("ctrl_break handled!"),
+//         wincon::CTRL_CLOSE_EVENT => TRUE,    //eprintln!("ctrl_close handled!"),
+//         wincon::CTRL_LOGOFF_EVENT => TRUE,   //eprintln!("ctrl_logoff handled!"),
+//         wincon::CTRL_SHUTDOWN_EVENT => TRUE, //eprintln!("ctrl_shutdown handled!"),
+//         other => {
+//             eprintln!("unknown event number: {}, unhandled!", other);
+//             return FALSE;
+//         }
+//     }
+// }
 
 mod shims;
 use shims::Shim;
@@ -46,10 +49,10 @@ const EXIT_PROG_TERMINATED: i32 = 4;
 
 const ERROR_ELEVATION_REQUIRED: i32 = 740;
 fn main() {
-    let res: BOOL = unsafe { consoleapi::SetConsoleCtrlHandler(Some(routine_handler), TRUE) };
-    if res == FALSE {
-        eprintln!("shim: register Ctrl handler failed.");
-    }
+    // let res: BOOL = unsafe { consoleapi::SetConsoleCtrlHandler(Some(routine_handler), TRUE) };
+    // if res == FALSE {
+        // eprintln!("shim: register Ctrl handler failed.");
+    // }
 
     let calling_args: Vec<_> = env::args().skip(1).collect();
     let shim = match Shim::init() {
